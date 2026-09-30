@@ -61,6 +61,16 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 .tr button{border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;background:var(--ac);color:#fff;cursor:pointer;min-width:92px}
 .tr button.g{background:#2fb344}
 .tr button.d{background:#8885;color:var(--fg)}
+
+.pb{max-width:400px;margin:0 auto 8px;height:10px;background:#8883;border-radius:6px;overflow:hidden}
+.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd54a,#ff8a00);transition:width .3s}
+#md{position:fixed;inset:0;z-index:15;background:#0009;display:none;align-items:center;justify-content:center}
+#md.on{display:flex}
+.mc{background:var(--card);color:var(--fg);border-radius:18px;padding:22px;max-width:320px;width:86%;text-align:center;animation:pop .3s}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+.mc h2{margin:0 0 8px}
+.mc button{display:block;width:100%;margin:8px 0;border:0;border-radius:12px;padding:12px;font-weight:700;font-size:15px;background:var(--ac);color:#fff;cursor:pointer}
+.mm{font-size:13px;min-height:16px}
 </style></head><body>
 <div id="home">
 <div class="gem">🍓</div>
@@ -68,7 +78,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <div class="sub">¡Combina frutas, gana 🪙 y canjea premios!</div>
 <button id="play" onclick="enter()">▶ JUGAR</button>
 <div class="chip">🪙 <b id="hc">0</b> monedas</div>
-<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button></div>
+<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
 <div class="sub" id="hm"></div>
 </div>
 
@@ -90,7 +100,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <div class="cd st"><div><b id="td">0/0</b>Completadas</div><div><b id="tl">0</b>🪙 por ganar</div></div>
 <div class="cd"><div id="tl2"></div><div id="tm" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
 </div></div>
-<div class="top"><span>⭐ <b id="sc">0</b></span><span>👟 <b id="mv">25</b></span><span>🪙 <b id="co">0</b></span></div>
+<div id="md"></div>
+<div class="top"><span>🏆 Nv <b id="lv">1</b></span><span>⭐ <b id="sc">0</b>/<b id="tg">0</b></span><span>👟 <b id="mv">25</b></span><span>🪙 <b id="co">0</b></span></div>
+<div class="pb"><i id="pbi"></i></div>
 <div id="b"></div>
 <div id="m"></div>
 <div class="row">
@@ -100,23 +112,24 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <button onclick="daily()">🎁 Premio diario</button>
 <button onclick="openRef()">👥 Referidos</button>
 <button onclick="openTk()">🎯 Tareas</button>
-<button onclick="reset()">↻ Nuevo juego</button>
+<button onclick="reset()">↻ Reintentar</button>
 <button onclick="goHome()">🏠 Inicio</button>
+<button class="mbtn" onclick="toggleMusic()">🎵 Música</button>
 </div>
 <script>
 const N=8,T=['🍓','🍋','🍇','🍏','🫐','🍊'],$=id=>document.getElementById(id);
 let g=[],sel=null,score=0,moves=25,coins=0,gc=0,busy=false,adBusy=false;
 try{coins=+localStorage.getItem('c')||0}catch(e){}
-const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.floor(Math.random()*T.length);
-function msg(t){$('m').textContent=t;$('hm').textContent=t}
-function ui(){$('sc').textContent=score;$('mv').textContent=moves;$('co').textContent=coins;$('hc').textContent=coins;try{localStorage.setItem('c',coins)}catch(e){}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.floor(Math.random()*nt);
+function msg(t){$('m').textContent=t;$('hm').textContent=t;const e=$('ms');if(e)e.textContent=t}
+function ui(){$('lv').textContent=level;$('tg').textContent=target;$('pbi').style.width=Math.min(100,score/target*100)+'%';$('play').textContent='▶ JUGAR · NIVEL '+level;$('sc').textContent=score;$('mv').textContent=moves;$('co').textContent=coins;$('hc').textContent=coins;try{localStorage.setItem('c',coins)}catch(e){}}
 function matches(){const s=new Set();
 for(let r=0;r<N;r++)for(let c=0;c<N-2;c++){const i=r*N+c;if(g[i]!=null&&g[i]==g[i+1]&&g[i]==g[i+2]){s.add(i);s.add(i+1);s.add(i+2)}}
 for(let c=0;c<N;c++)for(let r=0;r<N-2;r++){const i=r*N+c;if(g[i]!=null&&g[i]==g[i+N]&&g[i]==g[i+2*N]){s.add(i);s.add(i+N);s.add(i+2*N)}}
 return s}
 function draw(){$('b').innerHTML=g.map((v,i)=>`<button class="${i===sel?'s':''}" onclick="tap(${i})">${v==null?'':T[v]}</button>`).join('')}
 function drop(){for(let c=0;c<N;c++){const col=[];for(let r=N-1;r>=0;r--)if(g[r*N+c]!=null)col.push(g[r*N+c]);while(col.length<N)col.push(rnd());for(let r=N-1,k=0;r>=0;r--,k++)g[r*N+c]=col[k]}}
-function reset(){score=0;moves=25;gc=0;sel=null;g=Array.from({length:N*N},rnd);let m;while((m=matches()).size){m.forEach(i=>g[i]=rnd())}msg('');draw();ui()}
+function reset(){cfg();score=0;moves=total;gc=0;dbl=false;sel=null;busy=false;closeModal();g=Array.from({length:N*N},rnd);let m;while((m=matches()).size||!hasMove()){if(m.size)m.forEach(i=>g[i]=rnd());else g=Array.from({length:N*N},rnd)}msg('');draw();ui()}
 async function tap(i){if(busy||moves<=0)return;
 if(sel==null){sel=i;draw();return}
 const a=sel,d=Math.abs(a-i);sel=null;
@@ -126,13 +139,13 @@ if(!matches().size){[g[a],g[i]]=[g[i],g[a]];draw();busy=false;return}
 moves--;let chain=0,m;
 while((m=matches()).size){chain++;score+=m.size*10*chain;{const w=Math.ceil(m.size/3)*chain;coins+=w;gc+=w}m.forEach(x=>g[x]=null);draw();ui();await wait(220);drop();draw();await wait(220)}
 if(chain>1)msg('¡Combo x'+chain+'! 🔥');
-if(moves<=0)msg('Sin movimientos. Mira un anuncio para seguir o inicia otro juego.');
-busy=false;ui()}
+busy=false;ui();
+if(score>=target)win();else if(moves<=0)lose();else if(!hasMove())shuf()}
 function ad(type){if(adBusy)return;adBusy=true;let t=3;msg('Anuncio… '+t+'s');
 /* AQUÍ va tu red de anuncios (Adsgram / Monetag). Da la recompensa solo cuando el anuncio termine. */
 const iv=setInterval(()=>{t--;if(t>0){msg('Anuncio… '+t+'s');return}clearInterval(iv);adBusy=false;
-if(type=='moves'){moves+=5;msg('¡+5 movimientos!')}
-else if(type=='x2'){coins+=gc;msg('¡Ganaste +'+gc+' 🪙 extra (x2)!');gc*=2}
+if(type=='moves'){moves+=5;closeModal();msg('¡+5 movimientos!')}
+else if(type=='x2'){if(dbl)msg('Ya duplicaste este premio');else{dbl=true;coins+=gc;msg('¡Ganaste +'+gc+' 🪙 extra (x2)!');gc*=2}}
 else{const r=[20,30,50,100][Math.floor(Math.random()*4)];coins+=r;msg('🎁 ¡El cofre tenía '+r+' 🪙!')}
 ui()},1000)}
 function daily(){let k='d',t=new Date().toDateString(),ok=true;
@@ -180,5 +193,41 @@ async function claimTk(id){const t=TASKS.find(x=>x.id==id);if(tdone[id])return;
 if(t.tg&&typeof JWT!=='undefined'&&JWT){try{await api('/tasks/claim',{task:id})}catch(e){$('tm').textContent='Aún no te has unido. Únete y vuelve a pulsar Reclamar.';return}}
 coins+=t.c;tdone[id]=1;try{localStorage.setItem('tk',JSON.stringify(tdone))}catch(e){}
 $('tm').textContent='¡+'+t.c+' 🪙 ganadas!';ui();renderTk()}
+let level=1,target=300,total=25,nt=5,dbl=false;
+try{level=+localStorage.getItem('lv')||1}catch(e){}
+/* Niveles infinitos: cada nivel sube la meta y, poco a poco, baja los movimientos y añade frutas */
+function cfg(){nt=Math.min(6,4+Math.ceil(level/4));total=Math.max(20,28-Math.floor(level/6));target=Math.round(300+140*Math.pow(level,0.75))}
+function modal(h){$('md').innerHTML='<div class="mc">'+h+'</div>';$('md').classList.add('on')}
+function closeModal(){$('md').classList.remove('on')}
+function hasMove(){for(let i=0;i<N*N;i++)for(const d of [1,N]){const j=i+d;if(j>=N*N||(d==1&&j%N==0))continue;[g[i],g[j]]=[g[j],g[i]];const ok=matches().size>0;[g[i],g[j]]=[g[j],g[i]];if(ok)return true}return false}
+function shuf(){let m;do{g=Array.from({length:N*N},rnd);while((m=matches()).size)m.forEach(i=>g[i]=rnd())}while(!hasMove());draw();msg('Sin jugadas: ¡tablero mezclado! 🔀')}
+function win(){const st=moves>=Math.ceil(total*.3)?3:moves>=Math.ceil(total*.1)?2:1,rw=20+level*5+st*5;coins+=rw;gc+=rw;
+const done=level;level++;try{localStorage.setItem('lv',level)}catch(e){}
+modal('<h2>🎉 ¡Nivel '+done+' superado!</h2><div style="font-size:34px">'+'⭐'.repeat(st)+'☆'.repeat(3-st)+'</div><p>+'+rw+' 🪙</p><button onclick="ad(\'x2\')">▶ Anuncio: duplicar monedas</button><button onclick="reset()">Siguiente nivel ▶</button><div id="ms" class="mm"></div>');ui()}
+function lose(){modal('<h2>😵 ¡Sin movimientos!</h2><p>Te faltaron '+(target-score)+' puntos.</p><button onclick="ad(\'moves\')">▶ Anuncio: +5 movimientos</button><button onclick="reset()">↻ Reintentar nivel '+level+'</button><div id="ms" class="mm"></div>')}
+/* Música relajante original, generada en el momento (sin archivos ni derechos de autor) */
+let ac=null,mG=null,mTimer=null,musicOn=true,mStep=0;
+try{musicOn=localStorage.getItem('mu')!=='0'}catch(e){}
+const CH=[[261.6,329.6,392],[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7]],PE=[523.3,587.3,659.3,784,880,1046.5];
+function tone(f,t,d,v,type){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
+g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+d*.35);g.gain.linearRampToValueAtTime(0,t+d);
+o.connect(g);g.connect(mG);o.start(t);o.stop(t+d+.05)}
+function tick(){if(!ac||ac.state!=='running'||!musicOn)return;const t=ac.currentTime+.05;
+if(mStep%8==0)CH[(mStep/8)%4].forEach(f=>{tone(f/2,t,7.5,.07,'triangle');tone(f,t,7.5,.04,'sine')});
+if(Math.random()<.65)tone(PE[Math.floor(Math.random()*PE.length)],t,2.6,.08,'sine');
+mStep++}
+function startMusic(){if(!musicOn)return;
+if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;ac=new C();
+mG=ac.createGain();mG.gain.value=.3;
+const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1800;
+const dl=ac.createDelay(1);dl.delayTime.value=.42;const fb=ac.createGain();fb.gain.value=.38;dl.connect(fb);fb.connect(dl);
+mG.connect(lp);lp.connect(ac.destination);lp.connect(dl);dl.connect(ac.destination)}
+ac.resume();if(!mTimer)mTimer=setInterval(tick,750)}
+function setMb(){document.querySelectorAll('.mbtn').forEach(b=>b.textContent=musicOn?'🎵 Música':'🔇 Sin música')}
+function toggleMusic(){musicOn=!musicOn;try{localStorage.setItem('mu',musicOn?'1':'0')}catch(e){}
+if(musicOn)startMusic();else if(ac)ac.suspend();setMb()}
+document.addEventListener('pointerdown',startMusic,{once:true});
+document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else if(musicOn)ac.resume()});
+setMb();
 reset();
 </script></body></html>
