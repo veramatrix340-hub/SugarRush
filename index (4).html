@@ -71,6 +71,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 .mc h2{margin:0 0 8px}
 .mc button{display:block;width:100%;margin:8px 0;border:0;border-radius:12px;padding:12px;font-weight:700;font-size:15px;background:var(--ac);color:#fff;cursor:pointer}
 .mm{font-size:13px;min-height:16px}
+
+#wd{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s;text-align:left}
+#wd.open{transform:none}
 </style></head><body>
 <div id="home">
 <div class="gem">🍓</div>
@@ -78,7 +81,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <div class="sub">¡Combina frutas, gana 🪙 y canjea premios!</div>
 <button id="play" onclick="enter()">▶ JUGAR</button>
 <div class="chip">🪙 <b id="hc">0</b> monedas</div>
-<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
+<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb" onclick="openWd()">💎 Retirar TON</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
 <div class="sub" id="hm"></div>
 </div>
 
@@ -100,6 +103,22 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <div class="cd st"><div><b id="td">0/0</b>Completadas</div><div><b id="tl">0</b>🪙 por ganar</div></div>
 <div class="cd"><div id="tl2"></div><div id="tm" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
 </div></div>
+<div id="wd"><div class="rw">
+<button class="back" onclick="closeWd()">← Volver</button>
+<h2>💎 Retirar TON</h2>
+<p>Convierte tus monedas en Toncoin (TON) y recíbelas en tu billetera.</p>
+<div class="cd st"><div><b id="wb">0</b>🪙 monedas</div><div><b id="wt">0</b>TON estimados</div></div>
+<div class="cd"><div class="t"><span>Tasa</span><b id="wr"></b></div><div class="t"><span>Mínimo de retiro</span><b id="wm"></b></div>
+<div class="bar"><i id="wp"></i></div><div id="wn" style="font-size:13px;margin-top:6px"></div></div>
+<div class="cd"><b>Tu billetera TON</b><div style="height:8px"></div>
+<input id="wa" placeholder="UQ… o EQ…" autocomplete="off" autocapitalize="off" spellcheck="false">
+<div style="height:10px"></div><b>Cantidad (TON)</b><div style="height:8px"></div>
+<input id="wq" type="number" step="0.01" min="1" placeholder="1.00">
+<div class="cb"><button onclick="wMax()">Máximo</button><button onclick="reqWd()">Solicitar retiro</button></div>
+<div id="wmsg" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
+<div class="cd"><b>Historial</b><div id="wh"></div></div>
+<p style="font-size:12px;opacity:.75">Los retiros se revisan manualmente y pueden tardar hasta 72 h. Se rechazan las cuentas duplicadas o con trampas. Revisa bien tu dirección: las transacciones en TON no se pueden revertir.</p>
+</div></div>
 <div id="md"></div>
 <div class="top"><span>🏆 Nv <b id="lv">1</b></span><span>⭐ <b id="sc">0</b>/<b id="tg">0</b></span><span>👟 <b id="mv">25</b></span><span>🪙 <b id="co">0</b></span></div>
 <div class="pb"><i id="pbi"></i></div>
@@ -112,6 +131,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <button onclick="daily()">🎁 Premio diario</button>
 <button onclick="openRef()">👥 Referidos</button>
 <button onclick="openTk()">🎯 Tareas</button>
+<button onclick="openWd()">💎 Retirar TON</button>
 <button onclick="reset()">↻ Reintentar</button>
 <button onclick="goHome()">🏠 Inicio</button>
 <button class="mbtn" onclick="toggleMusic()">🎵 Música</button>
@@ -229,5 +249,22 @@ if(musicOn)startMusic();else if(ac)ac.suspend();setMb()}
 document.addEventListener('pointerdown',startMusic,{once:true});
 document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else if(musicOn)ac.resume()});
 setMb();
+/* Retiros en TON. La tasa y el mínimo reales los decide el servidor; esto es solo para mostrarlos. */
+const CPT=100000,MINT=1;let wl=[];try{wl=JSON.parse(localStorage.getItem('wl')||'[]')}catch(e){}
+function renderWd(){const t=coins/CPT;$('wb').textContent=coins;$('wt').textContent=t.toFixed(4);
+$('wr').textContent=CPT.toLocaleString()+' 🪙 = 1 TON';$('wm').textContent=MINT+' TON';
+$('wp').style.width=Math.min(100,t/MINT*100)+'%';
+$('wn').textContent=t>=MINT?'¡Ya puedes solicitar tu retiro!':'Te faltan '+Math.ceil((MINT-t)*CPT)+' 🪙 para el mínimo';
+$('wh').innerHTML=wl.length?wl.slice().reverse().map(w=>'<div class="t"><span>'+w.q+' TON · '+w.s+'</span><span>'+w.d+'</span></div>').join(''):'<div style="opacity:.7;padding:8px 0">Aún no hay retiros</div>'}
+function openWd(){renderWd();$('wmsg').textContent='';$('wd').classList.add('open')}
+function closeWd(){$('wd').classList.remove('open')}
+function wMax(){$('wq').value=(Math.floor(coins/CPT*100)/100).toFixed(2)}
+async function reqWd(){const a=$('wa').value.trim(),q=Math.round(parseFloat($('wq').value)*100)/100,m=$('wmsg');
+if(!/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(a)&&!/^-?[01]:[0-9a-fA-F]{64}$/.test(a)){m.textContent='La dirección TON no es válida.';return}
+if(!(q>=MINT)){m.textContent='El mínimo de retiro es '+MINT+' TON.';return}
+const need=Math.round(q*CPT);if(need>coins){m.textContent='No tienes suficientes monedas.';return}
+if(typeof JWT!=='undefined'&&JWT){try{const r=await api('/withdraw',{ton_address:a,ton_amount:q});coins=r.coins;m.textContent='✅ Solicitud enviada. La revisaremos pronto.'}catch(e){m.textContent='No se pudo enviar. Quizá ya tienes una solicitud pendiente.';return}}
+else{coins-=need;m.textContent='Solicitud de PRUEBA guardada. Conecta el servidor para retiros reales.'}
+wl.push({q:q,s:'pendiente',d:new Date().toLocaleDateString()});try{localStorage.setItem('wl',JSON.stringify(wl))}catch(e){}ui();renderWd()}
 reset();
 </script></body></html>
