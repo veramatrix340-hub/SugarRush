@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gem Rush</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff7fb;--fg:#2a1a3a;--card:#fff;--ac:#e0409a;--sel:#ffd54a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1230;--fg:#f5eaff;--card:#2b1d47;--ac:#ff6bc1}}
+:root[data-theme="dark"]{--bg:#1c1230;--fg:#f5eaff;--card:#2b1d47;--ac:#ff6bc1}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;text-align:center}
+.top{display:flex;justify-content:space-around;padding:12px;font-weight:700}
+#b{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-width:400px;margin:0 auto;padding:8px;background:var(--card);border-radius:14px}
+#b button{aspect-ratio:1;font-size:min(7vw,28px);border:0;border-radius:8px;background:var(--bg);padding:0;cursor:pointer}
+#b button.s{background:var(--sel);transform:scale(1.1)}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px}
+.row button{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:14px}
+#m{min-height:22px;font-size:14px}
+
+#home{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));background:linear-gradient(135deg,#ff4fa3,#7b2ff7,#1fb6ff,#ff4fa3);background-size:300% 300%;animation:bg 8s ease infinite;color:#fff;overflow:hidden;transition:opacity .5s,transform .5s}
+#home.out{opacity:0;transform:scale(1.15);pointer-events:none}
+#home>*{position:relative}
+@keyframes bg{50%{background-position:100% 50%}}
+.f{position:absolute!important;bottom:-70px;opacity:.85;animation:up linear infinite}
+@keyframes up{to{transform:translateY(-120vh) rotate(360deg)}}
+.gem{font-size:min(28vw,120px);line-height:1;filter:drop-shadow(0 0 22px #fff);animation:spin 3.5s ease-in-out infinite}
+@keyframes spin{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.15)}}
+.logo{font-size:min(19vw,80px);font-weight:900;letter-spacing:2px;line-height:1;text-shadow:0 6px 0 #0004,0 0 30px #fff9;animation:bob 2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) scale(1.04)}}
+.sub{font-size:16px;font-weight:600;text-shadow:0 2px 6px #0005;min-height:20px}
+#play{border:0;border-radius:50px;padding:16px 46px;font-size:26px;font-weight:900;color:#fff;background:linear-gradient(#ffd54a,#ff8a00);box-shadow:0 8px 0 #b35c00,0 0 30px #ffd54a99;cursor:pointer;animation:pulse 1.2s ease-in-out infinite}
+#play:active{transform:translateY(6px);box-shadow:0 2px 0 #b35c00}
+@keyframes pulse{50%{transform:scale(1.09)}}
+.chip{background:#0004;border-radius:30px;padding:8px 18px;font-size:18px;font-weight:700;backdrop-filter:blur(4px)}
+.hrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.hb{border:2px solid #fff;background:#fff2;color:#fff;border-radius:14px;padding:10px 14px;font-weight:700;font-size:14px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#home,#home *{animation:none!important}}
+
+#ref{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s;text-align:left}
+#ref.open{transform:none}
+.rw{max-width:420px;margin:0 auto}
+.rw h2{margin:8px 0 4px;font-size:26px}
+.rw p{margin:0 0 12px;opacity:.85}
+.back{border:0;background:var(--card);color:var(--fg);border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px;cursor:pointer}
+.cd{background:var(--card);border-radius:14px;padding:14px;margin:12px 0}
+.cd input{width:100%;box-sizing:border-box;border:2px solid var(--ac);border-radius:10px;padding:10px;font-size:13px;background:var(--bg);color:var(--fg)}
+.cb{display:flex;gap:8px;margin-top:10px}
+.cb button{flex:1;background:var(--ac);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:700;font-size:14px;cursor:pointer}
+.st{display:flex;justify-content:space-around;text-align:center}
+.st b{display:block;font-size:26px}
+.t{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #8883}
+.t.ok{color:var(--ac);font-weight:700}
+.bar{height:10px;border-radius:6px;background:#8883;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd54a,#ff8a00);transition:width .4s}
+
+#tk{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s;text-align:left}
+#tk.open{transform:none}
+.tr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #8883}
+.tr .ic{font-size:26px;width:34px;text-align:center}
+.tr .nm{flex:1;font-weight:600;font-size:15px}
+.tr .nm small{display:block;color:var(--ac);font-weight:700}
+.tr button{border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;background:var(--ac);color:#fff;cursor:pointer;min-width:92px}
+.tr button.g{background:#2fb344}
+.tr button.d{background:#8885;color:var(--fg)}
+
+.pb{max-width:400px;margin:0 auto 8px;height:10px;background:#8883;border-radius:6px;overflow:hidden}
+.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd54a,#ff8a00);transition:width .3s}
+#md{position:fixed;inset:0;z-index:15;background:#0009;display:none;align-items:center;justify-content:center}
+#md.on{display:flex}
+.mc{background:var(--card);color:var(--fg);border-radius:18px;padding:22px;max-width:320px;width:86%;text-align:center;animation:pop .3s}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+.mc h2{margin:0 0 8px}
+.mc button{display:block;width:100%;margin:8px 0;border:0;border-radius:12px;padding:12px;font-weight:700;font-size:15px;background:var(--ac);color:#fff;cursor:pointer}
+.mm{font-size:13px;min-height:16px}
+
+#wd{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s;text-align:left}
+#wd.open{transform:none}
+</style></head><body>
+<div id="home">
+<div class="gem">🍓</div>
+<div class="logo">GEM RUSH</div>
+<div class="sub">¡Combina frutas, gana 🪙 y canjea premios!</div>
+<button id="play" onclick="enter()">▶ JUGAR</button>
+<div class="chip">🪙 <b id="hc">0</b> monedas</div>
+<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb" onclick="openWd()">💎 Retirar TON</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
+<div class="sub" id="hm"></div>
+</div>
+
+<div id="ref"><div class="rw">
+<button class="back" onclick="closeRef()">← Volver</button>
+<h2>👥 Invita y gana</h2>
+<p>Gana 50 🪙 por cada amigo que se una y juegue. ¡Más amigos, más premios!</p>
+<div class="cd"><b>Tu enlace de invitación</b><div style="height:8px"></div>
+<input id="rl" readonly>
+<div class="cb"><button onclick="copyLink()">📋 Copiar</button><button onclick="inv()">📨 Compartir</button></div>
+<div id="rm" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
+<div class="cd st"><div><b id="rf">0</b>Amigos</div><div><b id="rc">0</b>🪙 por invitar</div></div>
+<div class="cd"><b>Premios por invitar</b><div id="rt"></div><div class="bar"><i id="rb"></i></div><div id="rn" style="font-size:13px;margin-top:6px"></div></div>
+</div></div>
+<div id="tk"><div class="rw">
+<button class="back" onclick="closeTk()">← Volver</button>
+<h2>🎯 Tareas y premios</h2>
+<p>Síguenos y gana monedas gratis. Cada tarea se cobra una sola vez.</p>
+<div class="cd st"><div><b id="td">0/0</b>Completadas</div><div><b id="tl">0</b>🪙 por ganar</div></div>
+<div class="cd"><div id="tl2"></div><div id="tm" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
+</div></div>
+<div id="wd"><div class="rw">
+<button class="back" onclick="closeWd()">← Volver</button>
+<h2>💎 Retirar TON</h2>
+<p>Convierte tus monedas en Toncoin (TON) y recíbelas en tu billetera.</p>
+<div class="cd st"><div><b id="wb">0</b>🪙 monedas</div><div><b id="wt">0</b>TON estimados</div></div>
+<div class="cd"><div class="t"><span>Tasa</span><b id="wr"></b></div><div class="t"><span>Mínimo de retiro</span><b id="wm"></b></div>
+<div class="bar"><i id="wp"></i></div><div id="wn" style="font-size:13px;margin-top:6px"></div></div>
+<div class="cd"><b>Tu billetera TON</b><div style="height:8px"></div>
+<input id="wa" placeholder="UQ… o EQ…" autocomplete="off" autocapitalize="off" spellcheck="false">
+<div style="height:10px"></div><b>Cantidad (TON)</b><div style="height:8px"></div>
+<input id="wq" type="number" step="0.01" min="1" placeholder="1.00">
+<div class="cb"><button onclick="wMax()">Máximo</button><button onclick="reqWd()">Solicitar retiro</button></div>
+<div id="wmsg" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
+<div class="cd"><b>Historial</b><div id="wh"></div></div>
+<p style="font-size:12px;opacity:.75">Los retiros se revisan manualmente y pueden tardar hasta 72 h. Se rechazan las cuentas duplicadas o con trampas. Revisa bien tu dirección: las transacciones en TON no se pueden revertir.</p>
+</div></div>
+<div id="md"></div>
+<div class="top"><span>🏆 Nv <b id="lv">1</b></span><span>⭐ <b id="sc">0</b>/<b id="tg">0</b></span><span>👟 <b id="mv">25</b></span><span>🪙 <b id="co">0</b></span></div>
+<div class="pb"><i id="pbi"></i></div>
+<div id="b"></div>
+<div id="m"></div>
+<div class="row">
+<button onclick="ad('moves')">▶ Anuncio: +5 movimientos</button>
+<button onclick="ad('x2')">▶ Anuncio: duplicar monedas de la partida</button>
+<button onclick="ad('box')">▶ Anuncio: cofre sorpresa 🎁</button>
+<button onclick="daily()">🎁 Premio diario</button>
+<button onclick="openRef()">👥 Referidos</button>
+<button onclick="openTk()">🎯 Tareas</button>
+<button onclick="openWd()">💎 Retirar TON</button>
+<button onclick="reset()">↻ Reintentar</button>
+<button onclick="goHome()">🏠 Inicio</button>
+<button class="mbtn" onclick="toggleMusic()">🎵 Música</button>
+</div>
+<script>
+const N=8,T=['🍓','🍋','🍇','🍏','🫐','🍊'],$=id=>document.getElementById(id);
+let g=[],sel=null,score=0,moves=25,coins=0,gc=0,busy=false,adBusy=false;
+try{coins=+localStorage.getItem('c')||0}catch(e){}
+const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.floor(Math.random()*nt);
+function msg(t){$('m').textContent=t;$('hm').textContent=t;const e=$('ms');if(e)e.textContent=t}
+function ui(){$('lv').textContent=level;$('tg').textContent=target;$('pbi').style.width=Math.min(100,score/target*100)+'%';$('play').textContent='▶ JUGAR · NIVEL '+level;$('sc').textContent=score;$('mv').textContent=moves;$('co').textContent=coins;$('hc').textContent=coins;try{localStorage.setItem('c',coins)}catch(e){}}
+function matches(){const s=new Set();
+for(let r=0;r<N;r++)for(let c=0;c<N-2;c++){const i=r*N+c;if(g[i]!=null&&g[i]==g[i+1]&&g[i]==g[i+2]){s.add(i);s.add(i+1);s.add(i+2)}}
+for(let c=0;c<N;c++)for(let r=0;r<N-2;r++){const i=r*N+c;if(g[i]!=null&&g[i]==g[i+N]&&g[i]==g[i+2*N]){s.add(i);s.add(i+N);s.add(i+2*N)}}
+return s}
+function draw(){$('b').innerHTML=g.map((v,i)=>`<button class="${i===sel?'s':''}" onclick="tap(${i})">${v==null?'':T[v]}</button>`).join('')}
+function drop(){for(let c=0;c<N;c++){const col=[];for(let r=N-1;r>=0;r--)if(g[r*N+c]!=null)col.push(g[r*N+c]);while(col.length<N)col.push(rnd());for(let r=N-1,k=0;r>=0;r--,k++)g[r*N+c]=col[k]}}
+function reset(){cfg();score=0;moves=total;gc=0;dbl=false;sel=null;busy=false;closeModal();g=Array.from({length:N*N},rnd);let m;while((m=matches()).size||!hasMove()){if(m.size)m.forEach(i=>g[i]=rnd());else g=Array.from({length:N*N},rnd)}msg('');draw();ui()}
+async function tap(i){if(busy||moves<=0)return;
+if(sel==null){sel=i;draw();return}
+const a=sel,d=Math.abs(a-i);sel=null;
+if(!(d==1&&Math.floor(a/N)==Math.floor(i/N))&&d!=N){sel=i;draw();return}
+busy=true;[g[a],g[i]]=[g[i],g[a]];draw();await wait(150);
+if(!matches().size){[g[a],g[i]]=[g[i],g[a]];draw();busy=false;return}
+moves--;let chain=0,m;
+while((m=matches()).size){chain++;score+=m.size*10*chain;{const w=Math.ceil(m.size/3)*chain;coins+=w;gc+=w}m.forEach(x=>g[x]=null);draw();ui();await wait(220);drop();draw();await wait(220)}
+if(chain>1)msg('¡Combo x'+chain+'! 🔥');
+busy=false;ui();
+if(score>=target)win();else if(moves<=0)lose();else if(!hasMove())shuf()}
+function ad(type){if(adBusy)return;adBusy=true;let t=3;msg('Anuncio… '+t+'s');
+/* AQUÍ va tu red de anuncios (Adsgram / Monetag). Da la recompensa solo cuando el anuncio termine. */
+const iv=setInterval(()=>{t--;if(t>0){msg('Anuncio… '+t+'s');return}clearInterval(iv);adBusy=false;
+if(type=='moves'){moves+=5;closeModal();msg('¡+5 movimientos!')}
+else if(type=='x2'){if(dbl)msg('Ya duplicaste este premio');else{dbl=true;coins+=gc;msg('¡Ganaste +'+gc+' 🪙 extra (x2)!');gc*=2}}
+else{const r=[20,30,50,100][Math.floor(Math.random()*4)];coins+=r;msg('🎁 ¡El cofre tenía '+r+' 🪙!')}
+ui()},1000)}
+function daily(){let k='d',t=new Date().toDateString(),ok=true;
+try{ok=localStorage.getItem(k)!==t;if(ok)localStorage.setItem(k,t)}catch(e){}
+if(ok){coins+=25;msg('¡Premio diario: +25 🪙!');ui()}else msg('Ya reclamaste hoy. ¡Vuelve mañana!')}
+function inv(){msg('Abriendo invitación…');
+window.open('https://t.me/share/url?url='+encodeURIComponent(refLink())+'&text='+encodeURIComponent('¡Juega Gem Rush y gana premios! 🍓'),'_blank')}
+function enter(){$('home').classList.add('out');msg('')}
+function goHome(){$('home').classList.remove('out')}
+{const h=$('home');for(let i=0;i<18;i++){const e=document.createElement('span');e.className='f';e.textContent=T[i%6];e.style.cssText='left:'+Math.random()*94+'%;font-size:'+(24+Math.random()*30)+'px;animation-duration:'+(6+Math.random()*8)+'s;animation-delay:-'+Math.random()*10+'s';h.prepend(e)}}
+const BOT='TU_BOT',UID='TUID',TIERS=[[1,50],[5,300],[10,700],[25,2000]];
+let friends=0;try{friends=+localStorage.getItem('f')||0}catch(e){}
+function refLink(){return 'https://t.me/'+BOT+'?start=ref_'+UID}
+function renderRef(){$('rl').value=refLink();$('rf').textContent=friends;
+$('rc').textContent=TIERS.filter(t=>friends>=t[0]).reduce((a,t)=>a+t[1],0);
+$('rt').innerHTML=TIERS.map(t=>'<div class="t '+(friends>=t[0]?'ok':'')+'"><span>'+(friends>=t[0]?'✅':'🔒')+' '+t[0]+' amigo'+(t[0]>1?'s':'')+'</span><b>+'+t[1]+' 🪙</b></div>').join('');
+const n=TIERS.find(t=>friends<t[0]);$('rb').style.width=(n?friends/n[0]*100:100)+'%';
+$('rn').textContent=n?'Te faltan '+(n[0]-friends)+' amigo(s) para +'+n[1]+' 🪙':'¡Completaste todos los premios!'}
+function openRef(){renderRef();$('rm').textContent='';$('ref').classList.add('open')}
+function closeRef(){$('ref').classList.remove('open')}
+function copyLink(){const i=$('rl');const ok=()=>$('rm').textContent='¡Enlace copiado! ✅';
+try{navigator.clipboard.writeText(i.value).then(ok,()=>{i.select();document.execCommand('copy');ok()})}catch(e){i.select();try{document.execCommand('copy');ok()}catch(x){}}}
+const TASKS=[
+{id:'tg_channel',i:'📢',n:'Únete al canal de Telegram',c:100,u:'https://t.me/TU_CANAL',tg:1},
+{id:'tg_group',i:'💬',n:'Únete al grupo de Telegram',c:100,u:'https://t.me/TU_GRUPO',tg:1},
+{id:'yt',i:'▶️',n:'Suscríbete en YouTube',c:80,u:'https://youtube.com/@TU_CANAL'},
+{id:'ig',i:'📸',n:'Sigue en Instagram',c:80,u:'https://instagram.com/TU_USUARIO'},
+{id:'tt',i:'🎵',n:'Sigue en TikTok',c:80,u:'https://tiktok.com/@TU_USUARIO'},
+{id:'x',i:'✖️',n:'Sigue en X (Twitter)',c:60,u:'https://x.com/TU_USUARIO'},
+{id:'fb',i:'👍',n:'Sigue en Facebook',c:60,u:'https://facebook.com/TU_PAGINA'}];
+let tdone={},opened={};try{tdone=JSON.parse(localStorage.getItem('tk')||'{}')}catch(e){}
+function renderTk(){const now=Date.now();
+$('tl2').innerHTML=TASKS.map(t=>{let b;
+if(tdone[t.id])b='<button class="d" disabled>✅ Listo</button>';
+else if(opened[t.id]&&now-opened[t.id]>=8000)b='<button class="g" onclick="claimTk(\''+t.id+'\')">Reclamar</button>';
+else if(opened[t.id])b='<button class="d" disabled>Verificando…</button>';
+else b='<button onclick="goTk(\''+t.id+'\')">Ir</button>';
+return '<div class="tr"><span class="ic">'+t.i+'</span><span class="nm">'+t.n+'<small>+'+t.c+' 🪙</small></span>'+b+'</div>'}).join('');
+const dn=TASKS.filter(t=>tdone[t.id]);$('td').textContent=dn.length+'/'+TASKS.length;
+$('tl').textContent=TASKS.filter(t=>!tdone[t.id]).reduce((a,t)=>a+t.c,0)}
+function openTk(){renderTk();$('tm').textContent='';$('tk').classList.add('open')}
+function closeTk(){$('tk').classList.remove('open')}
+function goTk(id){const t=TASKS.find(x=>x.id==id);window.open(t.u,'_blank');opened[id]=Date.now();renderTk();setTimeout(renderTk,8100)}
+async function claimTk(id){const t=TASKS.find(x=>x.id==id);if(tdone[id])return;
+if(t.tg&&typeof JWT!=='undefined'&&JWT){try{await api('/tasks/claim',{task:id})}catch(e){$('tm').textContent='Aún no te has unido. Únete y vuelve a pulsar Reclamar.';return}}
+coins+=t.c;tdone[id]=1;try{localStorage.setItem('tk',JSON.stringify(tdone))}catch(e){}
+$('tm').textContent='¡+'+t.c+' 🪙 ganadas!';ui();renderTk()}
+let level=1,target=300,total=25,nt=5,dbl=false;
+try{level=+localStorage.getItem('lv')||1}catch(e){}
+/* Niveles infinitos: cada nivel sube la meta y, poco a poco, baja los movimientos y añade frutas */
+function cfg(){nt=Math.min(6,4+Math.ceil(level/4));total=Math.max(20,28-Math.floor(level/6));target=Math.round(300+140*Math.pow(level,0.75))}
+function modal(h){$('md').innerHTML='<div class="mc">'+h+'</div>';$('md').classList.add('on')}
+function closeModal(){$('md').classList.remove('on')}
+function hasMove(){for(let i=0;i<N*N;i++)for(const d of [1,N]){const j=i+d;if(j>=N*N||(d==1&&j%N==0))continue;[g[i],g[j]]=[g[j],g[i]];const ok=matches().size>0;[g[i],g[j]]=[g[j],g[i]];if(ok)return true}return false}
+function shuf(){let m;do{g=Array.from({length:N*N},rnd);while((m=matches()).size)m.forEach(i=>g[i]=rnd())}while(!hasMove());draw();msg('Sin jugadas: ¡tablero mezclado! 🔀')}
+function win(){const st=moves>=Math.ceil(total*.3)?3:moves>=Math.ceil(total*.1)?2:1,rw=20+level*5+st*5;coins+=rw;gc+=rw;
+const done=level;level++;try{localStorage.setItem('lv',level)}catch(e){}
+modal('<h2>🎉 ¡Nivel '+done+' superado!</h2><div style="font-size:34px">'+'⭐'.repeat(st)+'☆'.repeat(3-st)+'</div><p>+'+rw+' 🪙</p><button onclick="ad(\'x2\')">▶ Anuncio: duplicar monedas</button><button onclick="reset()">Siguiente nivel ▶</button><div id="ms" class="mm"></div>');ui()}
+function lose(){modal('<h2>😵 ¡Sin movimientos!</h2><p>Te faltaron '+(target-score)+' puntos.</p><button onclick="ad(\'moves\')">▶ Anuncio: +5 movimientos</button><button onclick="reset()">↻ Reintentar nivel '+level+'</button><div id="ms" class="mm"></div>')}
+/* Música relajante original, generada en el momento (sin archivos ni derechos de autor) */
+let ac=null,mG=null,mTimer=null,musicOn=true,mStep=0;
+try{musicOn=localStorage.getItem('mu')!=='0'}catch(e){}
+const CH=[[261.6,329.6,392],[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7]],PE=[523.3,587.3,659.3,784,880,1046.5];
+function tone(f,t,d,v,type){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
+g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+d*.35);g.gain.linearRampToValueAtTime(0,t+d);
+o.connect(g);g.connect(mG);o.start(t);o.stop(t+d+.05)}
+function tick(){if(!ac||ac.state!=='running'||!musicOn)return;const t=ac.currentTime+.05;
+if(mStep%8==0)CH[(mStep/8)%4].forEach(f=>{tone(f/2,t,7.5,.07,'triangle');tone(f,t,7.5,.04,'sine')});
+if(Math.random()<.65)tone(PE[Math.floor(Math.random()*PE.length)],t,2.6,.08,'sine');
+mStep++}
+function startMusic(){if(!musicOn)return;
+if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;ac=new C();
+mG=ac.createGain();mG.gain.value=.3;
+const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1800;
+const dl=ac.createDelay(1);dl.delayTime.value=.42;const fb=ac.createGain();fb.gain.value=.38;dl.connect(fb);fb.connect(dl);
+mG.connect(lp);lp.connect(ac.destination);lp.connect(dl);dl.connect(ac.destination)}
+ac.resume();if(!mTimer)mTimer=setInterval(tick,750)}
+function setMb(){document.querySelectorAll('.mbtn').forEach(b=>b.textContent=musicOn?'🎵 Música':'🔇 Sin música')}
+function toggleMusic(){musicOn=!musicOn;try{localStorage.setItem('mu',musicOn?'1':'0')}catch(e){}
+if(musicOn)startMusic();else if(ac)ac.suspend();setMb()}
+document.addEventListener('pointerdown',startMusic,{once:true});
+document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else if(musicOn)ac.resume()});
+setMb();
+/* Retiros en TON. La tasa y el mínimo reales los decide el servidor; esto es solo para mostrarlos. */
+const CPT=100000,MINT=1;let wl=[];try{wl=JSON.parse(localStorage.getItem('wl')||'[]')}catch(e){}
+function renderWd(){const t=coins/CPT;$('wb').textContent=coins;$('wt').textContent=t.toFixed(4);
+$('wr').textContent=CPT.toLocaleString()+' 🪙 = 1 TON';$('wm').textContent=MINT+' TON';
+$('wp').style.width=Math.min(100,t/MINT*100)+'%';
+$('wn').textContent=t>=MINT?'¡Ya puedes solicitar tu retiro!':'Te faltan '+Math.ceil((MINT-t)*CPT)+' 🪙 para el mínimo';
+$('wh').innerHTML=wl.length?wl.slice().reverse().map(w=>'<div class="t"><span>'+w.q+' TON · '+w.s+'</span><span>'+w.d+'</span></div>').join(''):'<div style="opacity:.7;padding:8px 0">Aún no hay retiros</div>'}
+function openWd(){renderWd();$('wmsg').textContent='';$('wd').classList.add('open')}
+function closeWd(){$('wd').classList.remove('open')}
+function wMax(){$('wq').value=(Math.floor(coins/CPT*100)/100).toFixed(2)}
+async function reqWd(){const a=$('wa').value.trim(),q=Math.round(parseFloat($('wq').value)*100)/100,m=$('wmsg');
+if(!/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(a)&&!/^-?[01]:[0-9a-fA-F]{64}$/.test(a)){m.textContent='La dirección TON no es válida.';return}
+if(!(q>=MINT)){m.textContent='El mínimo de retiro es '+MINT+' TON.';return}
+const need=Math.round(q*CPT);if(need>coins){m.textContent='No tienes suficientes monedas.';return}
+if(typeof JWT!=='undefined'&&JWT){try{const r=await api('/withdraw',{ton_address:a,ton_amount:q});coins=r.coins;m.textContent='✅ Solicitud enviada. La revisaremos pronto.'}catch(e){m.textContent='No se pudo enviar. Quizá ya tienes una solicitud pendiente.';return}}
+else{coins-=need;m.textContent='Solicitud de PRUEBA guardada. Conecta el servidor para retiros reales.'}
+wl.push({q:q,s:'pendiente',d:new Date().toLocaleDateString()});try{localStorage.setItem('wl',JSON.stringify(wl))}catch(e){}ui();renderWd()}
+reset();
+</script></body></html>
