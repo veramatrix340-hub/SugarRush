@@ -71,14 +71,27 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 .mc h2{margin:0 0 8px}
 .mc button{display:block;width:100%;margin:8px 0;border:0;border-radius:12px;padding:12px;font-weight:700;font-size:15px;background:var(--ac);color:#fff;cursor:pointer}
 .mm{font-size:13px;min-height:16px}
-</style></head><body>
+
+#wd{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s;text-align:left}
+#wd.open{transform:none}
+
+#ro{position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--fg);overflow-y:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .35s}
+#ro.open{transform:none}
+.wp{position:relative;width:min(78vw,300px);margin:22px auto 14px}
+.wheel{width:100%;aspect-ratio:1;border-radius:50%;border:6px solid var(--ac);position:relative;transition:transform 4s cubic-bezier(.17,.67,.12,1);box-shadow:0 0 25px #ff6bc188}
+.wheel::after{content:"";position:absolute;inset:40%;border-radius:50%;background:var(--card);border:4px solid var(--ac)}
+.ptr{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:32px;z-index:2;color:var(--ac);line-height:1}
+.lb{position:absolute;inset:0;text-align:center;padding-top:11%;font-weight:900;font-size:17px;color:#fff;text-shadow:0 1px 3px #000a;pointer-events:none}
+.cb button:disabled{opacity:.5}
+</style><script async src="https://sad.adsgram.ai/js/sad.min.js"></script>
+</head><body>
 <div id="home">
 <div class="gem">🍓</div>
 <div class="logo">GEM RUSH</div>
 <div class="sub">¡Combina frutas, gana 🪙 y canjea premios!</div>
 <button id="play" onclick="enter()">▶ JUGAR</button>
 <div class="chip">🪙 <b id="hc">0</b> monedas</div>
-<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
+<div class="hrow"><button class="hb" onclick="daily()">🎁 Premio diario</button><button class="hb" onclick="openRef()">👥 Referidos</button><button class="hb" onclick="openRo()">🎡 Ruleta</button><button class="hb" onclick="openTk()">🎯 Tareas</button><button class="hb" onclick="openWd()">💎 Retirar TON</button><button class="hb mbtn" onclick="toggleMusic()">🎵 Música</button></div>
 <div class="sub" id="hm"></div>
 </div>
 
@@ -100,6 +113,32 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <div class="cd st"><div><b id="td">0/0</b>Completadas</div><div><b id="tl">0</b>🪙 por ganar</div></div>
 <div class="cd"><div id="tl2"></div><div id="tm" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
 </div></div>
+<div id="wd"><div class="rw">
+<button class="back" onclick="closeWd()">← Volver</button>
+<h2>💎 Retirar TON</h2>
+<p>Convierte tus monedas en Toncoin (TON) y recíbelas en tu billetera.</p>
+<div class="cd st"><div><b id="wb">0</b>🪙 monedas</div><div><b id="wt">0</b>TON estimados</div></div>
+<div class="cd"><div class="t"><span>Tasa</span><b id="wr"></b></div><div class="t"><span>Mínimo de retiro</span><b id="wm"></b></div>
+<div class="bar"><i id="wp"></i></div><div id="wn" style="font-size:13px;margin-top:6px"></div></div>
+<div class="cd"><b>Tu billetera TON</b><div style="height:8px"></div>
+<input id="wa" placeholder="UQ… o EQ…" autocomplete="off" autocapitalize="off" spellcheck="false">
+<div style="height:10px"></div><b>Cantidad (TON)</b><div style="height:8px"></div>
+<input id="wq" type="number" step="0.01" min="1" placeholder="1.00">
+<div class="cb"><button onclick="wMax()">Máximo</button><button onclick="reqWd()">Solicitar retiro</button></div>
+<div id="wmsg" style="font-size:13px;margin-top:8px;min-height:16px"></div></div>
+<div class="cd"><b>Historial</b><div id="wh"></div></div>
+<p style="font-size:12px;opacity:.75">Los retiros se revisan manualmente y pueden tardar hasta 72 h. Se rechazan las cuentas duplicadas o con trampas. Revisa bien tu dirección: las transacciones en TON no se pueden revertir.</p>
+</div></div>
+<div id="ro"><div class="rw" style="text-align:center">
+<button class="back" onclick="closeRo()" style="float:left">← Volver</button><div style="clear:both"></div>
+<h2>🎡 Ruleta de premios</h2>
+<p>Tienes <b id="rn2">3</b> giros. ¡Ve un anuncio y gana 1 giro extra!</p>
+<div class="wp"><div class="ptr">▼</div><div class="wheel" id="wheel"></div></div>
+<div class="cb"><button id="spinb" onclick="spin()">🎡 GIRAR</button></div>
+<div class="cb"><button onclick="adSpin()">▶ Ver anuncio: +1 giro</button></div>
+<div id="rom" style="font-size:15px;margin-top:12px;min-height:22px;font-weight:700"></div>
+<div style="font-size:12px;opacity:.75;margin-top:6px">3 giros gratis cada día y hasta 10 giros extra al día viendo anuncios.</div>
+</div></div>
 <div id="md"></div>
 <div class="top"><span>🏆 Nv <b id="lv">1</b></span><span>⭐ <b id="sc">0</b>/<b id="tg">0</b></span><span>👟 <b id="mv">25</b></span><span>🪙 <b id="co">0</b></span></div>
 <div class="pb"><i id="pbi"></i></div>
@@ -111,7 +150,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-se
 <button onclick="ad('box')">▶ Anuncio: cofre sorpresa 🎁</button>
 <button onclick="daily()">🎁 Premio diario</button>
 <button onclick="openRef()">👥 Referidos</button>
+<button onclick="openRo()">🎡 Ruleta</button>
 <button onclick="openTk()">🎯 Tareas</button>
+<button onclick="openWd()">💎 Retirar TON</button>
 <button onclick="reset()">↻ Reintentar</button>
 <button onclick="goHome()">🏠 Inicio</button>
 <button class="mbtn" onclick="toggleMusic()">🎵 Música</button>
@@ -121,7 +162,7 @@ const N=8,T=['🍓','🍋','🍇','🍏','🫐','🍊'],$=id=>document.getElemen
 let g=[],sel=null,score=0,moves=25,coins=0,gc=0,busy=false,adBusy=false;
 try{coins=+localStorage.getItem('c')||0}catch(e){}
 const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.floor(Math.random()*nt);
-function msg(t){$('m').textContent=t;$('hm').textContent=t;const e=$('ms');if(e)e.textContent=t}
+function msg(t){$('m').textContent=t;$('hm').textContent=t;const e=$('ms');if(e)e.textContent=t;const q=$('rom');if(q)q.textContent=t}
 function ui(){$('lv').textContent=level;$('tg').textContent=target;$('pbi').style.width=Math.min(100,score/target*100)+'%';$('play').textContent='▶ JUGAR · NIVEL '+level;$('sc').textContent=score;$('mv').textContent=moves;$('co').textContent=coins;$('hc').textContent=coins;try{localStorage.setItem('c',coins)}catch(e){}}
 function matches(){const s=new Set();
 for(let r=0;r<N;r++)for(let c=0;c<N-2;c++){const i=r*N+c;if(g[i]!=null&&g[i]==g[i+1]&&g[i]==g[i+2]){s.add(i);s.add(i+1);s.add(i+2)}}
@@ -141,13 +182,23 @@ while((m=matches()).size){chain++;score+=m.size*10*chain;{const w=Math.ceil(m.si
 if(chain>1)msg('¡Combo x'+chain+'! 🔥');
 busy=false;ui();
 if(score>=target)win();else if(moves<=0)lose();else if(!hasMove())shuf()}
-function ad(type){if(adBusy)return;adBusy=true;let t=3;msg('Anuncio… '+t+'s');
-/* AQUÍ va tu red de anuncios (Adsgram / Monetag). Da la recompensa solo cuando el anuncio termine. */
-const iv=setInterval(()=>{t--;if(t>0){msg('Anuncio… '+t+'s');return}clearInterval(iv);adBusy=false;
+/* ===== ANUNCIOS CON RECOMPENSA =====
+   Para ganar dinero real, pon aquí el ID de bloque que te da tu red de anuncios (Adsgram).
+   Si está vacío o el SDK no carga, el juego usa un anuncio de PRUEBA de 3 segundos. */
+const ADS={adsgramBlockId:'',
+/* Tu unidad de AdMob. AdMob solo funciona dentro de apps nativas Android/iOS, no en páginas web
+   ni en Mini Apps de Telegram, por eso aquí no se usa. */
+admob:'ca-app-pub-1806048457149145/7871851151'};
+function showAd(){
+if(window.Adsgram&&ADS.adsgramBlockId){try{return window.Adsgram.init({blockId:ADS.adsgramBlockId}).show().then(r=>!!(r&&r.done),()=>false)}catch(e){return Promise.resolve(false)}}
+return new Promise(res=>{let t=3;msg('Anuncio de prueba… '+t+'s');const iv=setInterval(()=>{t--;if(t>0){msg('Anuncio de prueba… '+t+'s');return}clearInterval(iv);res(true)},1000)})}
+async function ad(type){if(adBusy)return;adBusy=true;msg('Cargando anuncio…');
+const ok=await showAd();adBusy=false;
+if(!ok){msg('No viste el anuncio completo, no hay recompensa.');return}
 if(type=='moves'){moves+=5;closeModal();msg('¡+5 movimientos!')}
 else if(type=='x2'){if(dbl)msg('Ya duplicaste este premio');else{dbl=true;coins+=gc;msg('¡Ganaste +'+gc+' 🪙 extra (x2)!');gc*=2}}
 else{const r=[20,30,50,100][Math.floor(Math.random()*4)];coins+=r;msg('🎁 ¡El cofre tenía '+r+' 🪙!')}
-ui()},1000)}
+ui()}
 function daily(){let k='d',t=new Date().toDateString(),ok=true;
 try{ok=localStorage.getItem(k)!==t;if(ok)localStorage.setItem(k,t)}catch(e){}
 if(ok){coins+=25;msg('¡Premio diario: +25 🪙!');ui()}else msg('Ya reclamaste hoy. ¡Vuelve mañana!')}
@@ -156,7 +207,7 @@ window.open('https://t.me/share/url?url='+encodeURIComponent(refLink())+'&text='
 function enter(){$('home').classList.add('out');msg('')}
 function goHome(){$('home').classList.remove('out')}
 {const h=$('home');for(let i=0;i<18;i++){const e=document.createElement('span');e.className='f';e.textContent=T[i%6];e.style.cssText='left:'+Math.random()*94+'%;font-size:'+(24+Math.random()*30)+'px;animation-duration:'+(6+Math.random()*8)+'s;animation-delay:-'+Math.random()*10+'s';h.prepend(e)}}
-const BOT='TU_BOT',UID='TUID',TIERS=[[1,50],[5,300],[10,700],[25,2000]];
+const BOT='Gem_Rushbot',UID='TUID',TIERS=[[1,50],[5,300],[10,700],[25,2000]];
 let friends=0;try{friends=+localStorage.getItem('f')||0}catch(e){}
 function refLink(){return 'https://t.me/'+BOT+'?start=ref_'+UID}
 function renderRef(){$('rl').value=refLink();$('rf').textContent=friends;
@@ -169,12 +220,12 @@ function closeRef(){$('ref').classList.remove('open')}
 function copyLink(){const i=$('rl');const ok=()=>$('rm').textContent='¡Enlace copiado! ✅';
 try{navigator.clipboard.writeText(i.value).then(ok,()=>{i.select();document.execCommand('copy');ok()})}catch(e){i.select();try{document.execCommand('copy');ok()}catch(x){}}}
 const TASKS=[
-{id:'tg_channel',i:'📢',n:'Únete al canal de Telegram',c:100,u:'https://t.me/TU_CANAL',tg:1},
+{id:'tg_channel',i:'📢',n:'Únete al canal de Telegram',c:100,get u(){return refLink()},tg:1},
 {id:'tg_group',i:'💬',n:'Únete al grupo de Telegram',c:100,u:'https://t.me/TU_GRUPO',tg:1},
 {id:'yt',i:'▶️',n:'Suscríbete en YouTube',c:80,u:'https://youtube.com/@TU_CANAL'},
 {id:'ig',i:'📸',n:'Sigue en Instagram',c:80,u:'https://instagram.com/TU_USUARIO'},
 {id:'tt',i:'🎵',n:'Sigue en TikTok',c:80,u:'https://tiktok.com/@TU_USUARIO'},
-{id:'x',i:'✖️',n:'Sigue en X (Twitter)',c:60,u:'https://x.com/TU_USUARIO'},
+{id:'x',i:'✖️',n:'Sigue en X (Twitter)',c:60,u:'https://x.com/Kprettiboy12964'},
 {id:'fb',i:'👍',n:'Sigue en Facebook',c:60,u:'https://facebook.com/TU_PAGINA'}];
 let tdone={},opened={};try{tdone=JSON.parse(localStorage.getItem('tk')||'{}')}catch(e){}
 function renderTk(){const now=Date.now();
@@ -229,5 +280,44 @@ if(musicOn)startMusic();else if(ac)ac.suspend();setMb()}
 document.addEventListener('pointerdown',startMusic,{once:true});
 document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else if(musicOn)ac.resume()});
 setMb();
+/* Retiros en TON. La tasa y el mínimo reales los decide el servidor; esto es solo para mostrarlos. */
+const CPT=100000,MINT=1;let wl=[];try{wl=JSON.parse(localStorage.getItem('wl')||'[]')}catch(e){}
+function renderWd(){const t=coins/CPT;$('wb').textContent=coins;$('wt').textContent=t.toFixed(4);
+$('wr').textContent=CPT.toLocaleString()+' 🪙 = 1 TON';$('wm').textContent=MINT+' TON';
+$('wp').style.width=Math.min(100,t/MINT*100)+'%';
+$('wn').textContent=t>=MINT?'¡Ya puedes solicitar tu retiro!':'Te faltan '+Math.ceil((MINT-t)*CPT)+' 🪙 para el mínimo';
+$('wh').innerHTML=wl.length?wl.slice().reverse().map(w=>'<div class="t"><span>'+w.q+' TON · '+w.s+'</span><span>'+w.d+'</span></div>').join(''):'<div style="opacity:.7;padding:8px 0">Aún no hay retiros</div>'}
+function openWd(){renderWd();$('wmsg').textContent='';$('wd').classList.add('open')}
+function closeWd(){$('wd').classList.remove('open')}
+function wMax(){$('wq').value=(Math.floor(coins/CPT*100)/100).toFixed(2)}
+async function reqWd(){const a=$('wa').value.trim(),q=Math.round(parseFloat($('wq').value)*100)/100,m=$('wmsg');
+if(!/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(a)&&!/^-?[01]:[0-9a-fA-F]{64}$/.test(a)){m.textContent='La dirección TON no es válida.';return}
+if(!(q>=MINT)){m.textContent='El mínimo de retiro es '+MINT+' TON.';return}
+const need=Math.round(q*CPT);if(need>coins){m.textContent='No tienes suficientes monedas.';return}
+if(typeof JWT!=='undefined'&&JWT){try{const r=await api('/withdraw',{ton_address:a,ton_amount:q});coins=r.coins;m.textContent='✅ Solicitud enviada. La revisaremos pronto.'}catch(e){m.textContent='No se pudo enviar. Quizá ya tienes una solicitud pendiente.';return}}
+else{coins-=need;m.textContent='Solicitud de PRUEBA guardada. Conecta el servidor para retiros reales.'}
+wl.push({q:q,s:'pendiente',d:new Date().toLocaleDateString()});try{localStorage.setItem('wl',JSON.stringify(wl))}catch(e){}ui();renderWd()}
+/* ===== RULETA DE PREMIOS: 3 giros gratis al día + 1 giro extra por cada anuncio visto ===== */
+const PZ=[5,50,10,100,15,30,20,200],WT={5:30,10:25,15:18,20:12,30:8,50:4,100:2.5,200:.5},ADSPIN_MAX=10,
+RCOL=['#ff4fa3','#7b2ff7','#1fb6ff','#ffb300','#2fb344','#ff6b35','#00b8a9','#e63946'];
+let spins=3,roAds=0,roDay='',rot=0,spinning=false,wBuilt=false;
+try{roDay=localStorage.getItem('rd')||'';const q=localStorage.getItem('rs');if(q!==null)spins=+q;roAds=+localStorage.getItem('ra')||0}catch(e){}
+function roSave(){try{localStorage.setItem('rd',roDay);localStorage.setItem('rs',spins);localStorage.setItem('ra',roAds)}catch(e){}}
+function roCheck(){const t=new Date().toDateString();if(roDay!==t){if(roDay!==''){spins=Math.max(spins,3);roAds=0}roDay=t;roSave()}}
+function buildWheel(){const w=$('wheel');w.style.background='conic-gradient('+PZ.map((p,i)=>RCOL[i]+' '+i*45+'deg '+(i+1)*45+'deg').join(',')+')';
+w.innerHTML=PZ.map((p,i)=>'<div class="lb" style="transform:rotate('+(i*45+22.5)+'deg)">'+p+'</div>').join('');wBuilt=true}
+function renderRo(){$('rn2').textContent=spins;$('spinb').disabled=spinning||spins<1}
+function openRo(){roCheck();if(!wBuilt)buildWheel();renderRo();$('rom').textContent='';$('ro').classList.add('open')}
+function closeRo(){if(!spinning)$('ro').classList.remove('open')}
+function spin(){if(spinning||spins<1)return;spinning=true;spins--;roSave();
+let r=Math.random()*100,p=PZ[0];for(const k of PZ){r-=WT[k];if(r<0){p=k;break}}
+const center=PZ.indexOf(p)*45+22.5,cur=((rot%360)+360)%360,delta=(((360-center)-cur)+360)%360;
+rot+=360*5+delta;$('wheel').style.transform='rotate('+rot+'deg)';$('rom').textContent='Girando…';renderRo();
+setTimeout(()=>{coins+=p;spinning=false;$('rom').textContent='🎉 ¡Ganaste +'+p+' 🪙!';ui();renderRo()},4200)}
+async function adSpin(){if(adBusy||spinning)return;roCheck();
+if(roAds>=ADSPIN_MAX){$('rom').textContent='Ya usaste los '+ADSPIN_MAX+' giros extra de hoy. ¡Vuelve mañana!';return}
+adBusy=true;$('rom').textContent='Cargando anuncio…';const ok=await showAd();adBusy=false;
+if(!ok){$('rom').textContent='No viste el anuncio completo, no hay giro extra.';return}
+spins++;roAds++;roSave();renderRo();$('rom').textContent='¡+1 giro extra! 🎡'}
 reset();
 </script></body></html>
